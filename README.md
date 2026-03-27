@@ -1,0 +1,2 @@
+# nitpicker
+AI PR reviewer
