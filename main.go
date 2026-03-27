@@ -11,26 +11,26 @@ import (
 
 func main() {
 	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "usage: nitpicker <patch-url>\n")
+		fmt.Fprintf(os.Stderr, "usage: nitpicker <diff-url>\n")
 		os.Exit(1)
 	}
 	url := os.Args[1]
 
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error fetching patch: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error fetching diff: %v\n", err)
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Fprintf(os.Stderr, "error fetching patch: HTTP %d\n", resp.StatusCode)
+		fmt.Fprintf(os.Stderr, "error fetching diff: HTTP %d\n", resp.StatusCode)
 		os.Exit(1)
 	}
 
 	stats, err := patch.Parse(resp.Body)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error parsing patch: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error parsing diff: %v\n", err)
 		os.Exit(1)
 	}
 

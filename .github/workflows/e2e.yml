@@ -1,0 +1,35 @@
+name: E2E Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Build
+        run: go build -o nitpicker .
+
+      - name: Run against real PR diff
+        run: |
+          output=$(./nitpicker https://patch-diff.githubusercontent.com/raw/nizarmah/mm.quest/pull/4.diff)
+          echo "$output"
+
+          # Verify file list
+          echo "$output" | grep -q "js/main.js"
+
+          # Verify per-file stats
+          echo "$output" | grep -q "+6"
+          echo "$output" | grep -q "\-5"
+
+          # Verify totals
+          echo "$output" | grep -q "1 files changed, 6 insertions(+), 5 deletions(-)"
