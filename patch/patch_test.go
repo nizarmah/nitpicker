@@ -6,17 +6,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	input := `From abc123 Mon Sep 17 00:00:00 2001
-From: Author <author@example.com>
-Date: Mon, 1 Jan 2024 00:00:00 +0000
-Subject: [PATCH] Add feature
-
----
- src/app.tsx  | 15 ++++++++++++---
- src/index.ts | 45 +++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 57 insertions(+), 3 deletions(-)
-
-diff --git a/src/app.tsx b/src/app.tsx
+	input := `diff --git a/src/app.tsx b/src/app.tsx
 index 1234567..abcdefg 100644
 --- a/src/app.tsx
 +++ b/src/app.tsx
@@ -86,20 +76,32 @@ index 0000000..1234567
 	}
 }
 
-func TestParseSameFileMultipleCommits(t *testing.T) {
-	input := `diff --git a/README.md b/README.md
---- a/README.md
-+++ b/README.md
-@@ -1 +1,2 @@
- # Hello
-+World
-diff --git a/README.md b/README.md
---- a/README.md
-+++ b/README.md
-@@ -1,2 +1,3 @@
- # Hello
- World
-+Again
+func TestParseMultipleHunks(t *testing.T) {
+	// Simulates the squashed diff from nizarmah/mm.quest/pull/4.diff
+	input := `diff --git a/js/main.js b/js/main.js
+index f42e856..254ec71 100644
+--- a/js/main.js
++++ b/js/main.js
+@@ -180,13 +180,14 @@ const goToLoader = (screen) => {
+   const quote = document.createElement("div")
+   quote.className = "quote"
+
+-  const vanillaSkies = [
+-    "it's the little things.",
+-    "there's nothing bigger...",
+-    "is there?"
++  const ferrisBueller = [
++    "Life moves pretty fast.",
++    "If you don't stop and",
++    "look around once in a while,",
++    "you could miss it."
+   ]
+
+-  vanillaSkies.forEach((line) => {
++  ferrisBueller.forEach((line) => {
+     const span = document.createElement("span")
+     span.textContent = line
+     quote.appendChild(span)
 `
 
 	stats, err := Parse(strings.NewReader(input))
@@ -110,10 +112,13 @@ diff --git a/README.md b/README.md
 	if len(stats) != 1 {
 		t.Fatalf("expected 1 file, got %d", len(stats))
 	}
-	if stats[0].Added != 2 {
-		t.Errorf("expected 2 added, got %d", stats[0].Added)
+	if stats[0].Path != "js/main.js" {
+		t.Errorf("expected path js/main.js, got %s", stats[0].Path)
 	}
-	if stats[0].Deleted != 0 {
-		t.Errorf("expected 0 deleted, got %d", stats[0].Deleted)
+	if stats[0].Added != 6 {
+		t.Errorf("expected 6 added, got %d", stats[0].Added)
+	}
+	if stats[0].Deleted != 5 {
+		t.Errorf("expected 5 deleted, got %d", stats[0].Deleted)
 	}
 }
